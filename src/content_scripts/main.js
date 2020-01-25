@@ -1,9 +1,13 @@
 class ContentPageManager{
-  hola(args){
-    if (args.phrase == "hello")
-      alert("goodbye");
-    else
-      alert("help me");
+  extractSearchString(args){
+    var searchString = document.getElementsByName("q")[0].value;
+
+    chrome.runtime.sendMessage({
+      "call": "retrieveSearchResults",
+      "args": {
+        "keywords": searchString
+      }
+    })
   }
 }
 
