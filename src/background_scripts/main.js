@@ -1,3 +1,42 @@
+class Searcher {
+  constructor(){
+    this.hostnames =  new Array("www.google.com", "www.bing.com", "duckduckgo.com");
+    this.results = new Array();
+  }
+
+  searchKeyword (keyword){
+
+    this.hostnames.forEach(function(hostname){
+
+      var oReq = new XMLHttpRequest();
+      if (hostname == "duckduckgo.com") {
+        var url = new URL('https://' + hostname + '/');
+        url.searchParams.set('q', keyword);
+        console.log(url);
+        oReq.open("GET", url);
+        oReq.responseType = 'text';
+        oReq.send();
+      }
+      else {
+        var url = new URL('https://' + hostname + '/search');
+        url.searchParams.set('q', keyword);
+        console.log(url);
+        oReq.open("GET", url);
+        oReq.responseType = 'text';
+        oReq.send();
+      }
+      oReq.onload = function() {
+        console.log(oReq.responseURL);
+        console.log(oReq.response);
+      };
+
+      oReq.onerror = function() {
+        console.log("failed");
+      }
+    });
+  }
+}
+
 class BackgroundExtension{
   getCurrentTab(callback) {
     var theTab;
@@ -6,28 +45,33 @@ class BackgroundExtension{
     });
 	}
 
-  saySomething(tab){
+  extractSearchString(tab){
+    var url = new URL(tab.url)
+    console.log(url.hostname);
     chrome.tabs.sendMessage(tab.id, {
-      call: "hola",
-      args: {phrase: "hello"}
+      call: "extractSearchString"
     });
-    console.log("dentro de saySomething");
 	}
+
+  retrieveSearchResults(args){
+    var searcher = new Searcher();
+    searcher.searchKeyword(args.keywords);
+  }
 }
 
 var startBackground = function(config) {
 	var extension = new BackgroundExtension(config.apiUrl);
-  console.log("iniciando background script");
+
 	chrome.browserAction.onClicked.addListener(() => {
-	  extension.getCurrentTab(extension.saySomething);
+	  extension.getCurrentTab(extension.extractSearchString);
 	});
 
-	// chrome.runtime.onMessage.addListener((request, sender) => {
-	// 	console.log("[background-side] calling the message: " + request.call);
-	// 	if(extension[request.call]){
-	// 		return extension[request.call](request.args);
-	// 	}
-	// });
+	chrome.runtime.onMessage.addListener((request, sender) => {
+		console.log("[background-side] calling the message: " + request.call);
+		if(extension[request.call]){
+			extension[request.call](request.args);
+		}
+	});
 }
 
 function checkExpectedParameters(config){
