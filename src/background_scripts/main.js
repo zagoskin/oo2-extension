@@ -1,43 +1,30 @@
 class Searcher {
   constructor(){
     this.hostnames =  new Array("www.google.com", "www.bing.com", "duckduckgo.com");
-    this.results = new Array();
   }
 
   searchKeyword (keyword){
 
+    var searchurls = new Array();
     this.hostnames.forEach(function(hostname){
 
-      var oReq = new XMLHttpRequest();
       if (hostname == "duckduckgo.com") {
-        var url = new URL('https://' + hostname + '/');
-        url.searchParams.set('q', keyword);
-        console.log(url);
-        oReq.open("GET", url);
-        oReq.responseType = 'text';
-        oReq.send();
+        var url ='https://' + hostname + '/?q=' + keyword;
+        searchurls.push(url)
       }
       else {
-        var url = new URL('https://' + hostname + '/search');
-        url.searchParams.set('q', keyword);
-        console.log(url);
-        oReq.open("GET", url);
-        oReq.responseType = 'text';
-        oReq.send();
-      }
-      oReq.onload = function() {
-        console.log(oReq.responseURL);
-        console.log(oReq.response);
-      };
-
-      oReq.onerror = function() {
-        console.log("failed");
+        var url ='https://' + hostname + '/search?q=' + keyword;
+        searchurls.push(url)
       }
     });
+    return searchurls;
   }
 }
 
 class BackgroundExtension{
+  decirHola(){
+    console.log("hola");
+  }
   getCurrentTab(callback) {
     var theTab;
 		return chrome.tabs.query({active: true,	currentWindow: true}, function(tabs) {
@@ -47,15 +34,33 @@ class BackgroundExtension{
 
   extractSearchString(tab){
     var url = new URL(tab.url)
-    console.log(url.hostname);
+    console.log(tab.id);
     chrome.tabs.sendMessage(tab.id, {
-      call: "extractSearchString"
+      call: "extractSearchString",
+      args: {
+        "hostname": url.hostname
+      }
     });
 	}
 
   retrieveSearchResults(args){
     var searcher = new Searcher();
-    searcher.searchKeyword(args.keywords);
+    console.log(args.hostname);
+    var searchUrls = searcher.searchKeyword(args.keywords);
+
+    searchUrls.forEach(function(url){
+      chrome.tabs.create({'url': url}, function(tab){
+        chrome.tabs.onUpdated.addListener(function listener (tabId, info) {
+            if (info.status === 'complete' && tabId === tab.id) {
+                chrome.tabs.onUpdated.removeListener(listener);
+                chrome.tabs.sendMessage(tab.id, {call: 'extractSearchResults'});
+            }
+        });
+        // chrome.tabs.sendMessage(tab.id, {
+        //   call: "extractSearchResults"
+        // });
+      });
+    });
   }
 }
 
