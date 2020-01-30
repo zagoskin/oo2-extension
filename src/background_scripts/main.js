@@ -19,12 +19,32 @@ class Searcher {
     });
     return searchurls;
   }
+
+  searchWithoutDomain (keyword,domain){
+
+    var searchurls = new Array();
+    var newHosts = this.hostnames.slice();
+    newHosts.splice(newHosts.indexOf(domain),1);
+
+    newHosts.forEach(function(hostname){
+
+      if (hostname == "duckduckgo.com") {
+        var url ='https://' + hostname + '/?q=' + keyword;
+        searchurls.push(url)
+      }
+      else {
+        var url ='https://' + hostname + '/search?q=' + keyword;
+        searchurls.push(url)
+      }
+    });
+    return searchurls;
+  }
 }
 
 class BackgroundExtension{
-  decirHola(){
-    console.log("hola");
-  }
+  // decirHola(){
+  //   console.log("hola");
+  // }
   getCurrentTab(callback) {
     var theTab;
 		return chrome.tabs.query({active: true,	currentWindow: true}, function(tabs) {
@@ -45,8 +65,8 @@ class BackgroundExtension{
 
   retrieveSearchResults(args){
     var searcher = new Searcher();
-    console.log(args.hostname);
-    var searchUrls = searcher.searchKeyword(args.keywords);
+
+    var searchUrls = searcher.searchWithoutDomain(args.keywords, args.hostname);
 
     searchUrls.forEach(function(url){
       chrome.tabs.create({'url': url}, function(tab){
