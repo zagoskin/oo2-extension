@@ -2,24 +2,26 @@ class SearchResultParser {
   constructor(dom){
     var host = window.location.hostname;
     if (host == 'duckduckgo.com'){
-      var titulos = new Array();
+      var parsedResults = new Array();
       // var resultados = dom.getElementById("links").querySelectorAll("div:not(#organic-module):not(.result):not(.result--more)");
-      var resultados = dom.getElementById("links").childNodes;
+      var divResults = dom.getElementById("links").childNodes;
 
-      for (var i = 0; i < resultados.length; i++) {
-        if (resultados[i].id != "organic-module" && resultados[i].className != "result result--more" && resultados[i].className != "js-result-hidden-el"){
-          titulos.push(resultados[i]);
+      for (var i = 0; i < divResults.length; i++) {
+        if (divResults[i].id != "organic-module" && divResults[i].className != "result result--more" && divResults[i].className != "js-result-hidden-el"){
+          parsedResults.push({
+            "urlsrc": host,
+            "urltarget": divResults[i].querySelector(".result__title").querySelector(".result__a").href,
+            "text": divResults[i].querySelector(".result__title").innerText,
+            "rank": i
+          });
         }
       }
-      console.log(titulos);
+      console.log(parsedResults);
       // resultados.forEach(resultado => {
       //   titulos.push(resultado.querySelector(".result__title").querySelector(".result__a").innerHTML);
       // });
     }
-    this.urlsrc = 'hola';
-    this.urltarget = 'hola';
-    this.text = titulos;
-    this.rank = 'hola';
+    this.results = parsedResults;
   }
 
 }
@@ -38,8 +40,9 @@ class ContentPageManager{
   }
 
   extractSearchResults(){
-    var result = new SearchResultParser(document);
-    alert(result.text);
+    var resultsparser = new SearchResultParser(document);
+    alert("hola");
+    // alert(resultsparser.results);
     // chrome.runtime.sendMessage({
     //   "call": "decirHola"
     // });
