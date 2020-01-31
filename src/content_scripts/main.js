@@ -13,10 +13,6 @@ class SearchResultParser {
     if (host == 'www.google.com'){
       this.results = this.parseFromGoogle(dom);
     }
-    console.log(this.results);
-
-
-
   }
 
   parseFromDuckDuckGo(dom){
