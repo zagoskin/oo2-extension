@@ -55,9 +55,11 @@ class BackgroundExtension{
   extractSearchString(tab){
     var url = new URL(tab.url)
     console.log(tab.id);
+
     chrome.tabs.sendMessage(tab.id, {
       call: "extractSearchString",
       args: {
+        "originaltabid": tab.id,
         "hostname": url.hostname
       }
     });
@@ -73,13 +75,29 @@ class BackgroundExtension{
         chrome.tabs.onUpdated.addListener(function listener (tabId, info) {
             if (info.status === 'complete' && tabId === tab.id) {
                 chrome.tabs.onUpdated.removeListener(listener);
-                chrome.tabs.sendMessage(tab.id, {call: 'extractSearchResults'});
+                chrome.tabs.sendMessage(tab.id, {
+                  call: 'extractSearchResults',
+                  args: {
+                    "originaltabid": args.originaltabid,
+                    "newtabid": tab.id
+                  }
+                });
             }
         });
-        // chrome.tabs.sendMessage(tab.id, {
-        //   call: "extractSearchResults"
-        // });
       });
+    });
+  }
+
+  sendResultsToMainContent(args){
+    chrome.tabs.remove(args.newtabid);
+    console.log(args.searchResults);
+    console.log(args.originaltabid);
+    chrome.tabs.sendMessage(args.originaltabid, {
+      call: "alertHola",
+      // args: {
+      //   "originaltabid": tab.id,
+      //   "hostname": url.hostname
+      // }
     });
   }
 }

@@ -69,6 +69,9 @@ class SearchResultParser {
 }
 
 class ContentPageManager{
+  // alertHola(){
+  //   alert("hola!");
+  // }
   extractSearchString(args){
     var searchString = document.getElementsByName("q")[0].value;
 
@@ -76,14 +79,23 @@ class ContentPageManager{
       "call": "retrieveSearchResults",
       "args": {
         "keywords": searchString,
-        "hostname": args.hostname
+        "hostname": args.hostname,
+        "originaltabid": args.originaltabid
       }
     });
   }
 
-  extractSearchResults(){
+  extractSearchResults(args){
     var resultsparser = new SearchResultParser(document);
-    alert("hola");
+    window.onload = chrome.runtime.sendMessage({
+                      "call": "sendResultsToMainContent",
+                      "args": {
+                        "searchResults": resultsparser.results,
+                        "originaltabid": args.originaltabid,
+                        "newtabid": args.newtabid
+                      }
+                    });
+
     // alert(resultsparser.results);
     // chrome.runtime.sendMessage({
     //   "call": "decirHola"
