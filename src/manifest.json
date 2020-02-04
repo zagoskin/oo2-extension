@@ -3,6 +3,7 @@
   "author": "Porto Juan Francisco",
   "version": "1.0",
   "description": "Creo mi primera extension",
+  "web_accessible_resources": ["*.jpg","*.JPG", "*.png", "*.PNG"],
   "permissions": [
     "activeTab",
     "tabs",
