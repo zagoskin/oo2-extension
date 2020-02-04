@@ -70,7 +70,7 @@ class SearchResultParser {
 
 class ContentPageManager{
   // alertHola(){
-  //   alert("hola!");
+  //   console.log("hola!");
   // }
   extractSearchString(args){
     var searchString = document.getElementsByName("q")[0].value;
@@ -90,16 +90,86 @@ class ContentPageManager{
     window.onload = chrome.runtime.sendMessage({
                       "call": "sendResultsToMainContent",
                       "args": {
-                        "searchResults": resultsparser.results,
+                        "searchresults": resultsparser.results,
                         "originaltabid": args.originaltabid,
                         "newtabid": args.newtabid
                       }
                     });
+  }
 
-    // alert(resultsparser.results);
-    // chrome.runtime.sendMessage({
-    //   "call": "decirHola"
-    // });
+  updateCurrentDOM(args){
+    var host = window.location.hostname;
+
+    this.updateContentOfDomain({
+      "host": host,
+      "searchresults": args.searchresults
+    });
+  }
+
+  updateDuckDuckGo(searchresults){
+
+  }
+
+  updateBing(searchresults){
+
+  }
+
+  updateGoogle(searchresults){
+    var divResults = document.getElementById("search").querySelectorAll("div.r");
+
+    var div = document.createElement("div");
+
+    var img = this.createLogo(searchresults[0].urlsrc);
+    var span = document.createElement("span");
+    span.textContent = "5";
+    span.style.width = "16px";
+    span.style.height = "16px";
+    span.style.position = "absolute";
+    span.style.fontSize = "16px";
+    span.style.color = "fff";
+    span.style.fontWeight = "900";
+
+    div.style.float = "left";
+    div.style.width = "14%";
+    div.appendChild(img);
+    div.appendChild(span);
+    for (var i = 0; i < divResults.length; i++) {
+      // divResults[i].style.overflow = "hidden";
+      // divResults[i].querySelector("h3").style.float = "left";
+      divResults[i].appendChild(div.cloneNode(true));
+    }
+
+  }
+
+  createLogo(url){
+    var imgelem = document.createElement("img");
+
+    if (url == "duckduckgo.com"){
+      imgelem.src = "chrome-extension://pegagencoflfghdhhihallhncmdojpgp/resources/duckduckgologo48.png";
+    }
+    if (url == "www.bing.com"){
+      imgelem.src = "chrome-extension://pegagencoflfghdhhihallhncmdojpgp/resources/binglogo48.png";
+    }
+    //falta la de google
+    imgelem.title = "logo";
+    imgelem.alt = "logo";
+    imgelem.style.padding = "4px";
+
+    return imgelem;
+  }
+
+  updateContentOfDomain(args){
+    if (args.host == 'duckduckgo.com'){
+      this.updateDuckDuckGo(args.searchresults);
+    }
+
+    if (args.host == 'www.bing.com'){
+      this.updateBing(args.searchresults);
+    }
+
+    if (args.host == 'www.google.com'){
+      this.updateGoogle(args.searchresults);
+    }
   }
 }
 

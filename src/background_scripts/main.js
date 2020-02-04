@@ -90,14 +90,15 @@ class BackgroundExtension{
 
   sendResultsToMainContent(args){
     chrome.tabs.remove(args.newtabid);
-    console.log(args.searchResults);
-    console.log(args.originaltabid);
+    chrome.tabs.get(args.originaltabid, function(tab) {
+      chrome.tabs.highlight({'tabs': tab.index}, function() {});
+    });
+    console.log(args.searchresults);
     chrome.tabs.sendMessage(args.originaltabid, {
-      call: "alertHola",
-      // args: {
-      //   "originaltabid": tab.id,
-      //   "hostname": url.hostname
-      // }
+      call: "updateCurrentDOM",
+      args: {
+        "searchresults": args.searchresults
+      }
     });
   }
 }
