@@ -120,25 +120,56 @@ class ContentPageManager{
     var div = document.createElement("div");
 
     var img = this.createLogo(searchresults[0].urlsrc);
-    var span = document.createElement("span");
-    span.textContent = "5";
-    span.style.width = "16px";
-    span.style.height = "16px";
-    span.style.position = "absolute";
-    span.style.fontSize = "16px";
-    span.style.color = "fff";
-    span.style.fontWeight = "900";
+
 
     div.style.float = "left";
     div.style.width = "14%";
     div.appendChild(img);
-    div.appendChild(span);
+
     for (var i = 0; i < divResults.length; i++) {
-      // divResults[i].style.overflow = "hidden";
-      // divResults[i].querySelector("h3").style.float = "left";
-      divResults[i].appendChild(div.cloneNode(true));
+      var j = 0;
+
+      while ((j < searchresults.length) && (divResults[i].querySelector("a").href != searchresults[j].urltarget)) {
+        j++;
+      }
+
+      if (j == searchresults.length){
+        var span = this.createRank("X");
+      }
+      else {
+        var span = this.createRank(j+1);
+      }
+
+      var newDiv = div.cloneNode(true);
+      newDiv.appendChild(span);
+      divResults[i].appendChild(newDiv);
+
     }
 
+  }
+
+
+  createRank(textcontent){
+    var spanelem = document.createElement("span");
+
+    spanelem.textContent = textcontent;
+    spanelem.style.borderRadius = "50%";
+    spanelem.style.width = "24px";
+    spanelem.style.height = "24px";
+    spanelem.style.lineHeight = "24px";
+    spanelem.style.textAlign = "center";
+    if (textcontent != "X") {
+      spanelem.style.background = "#81f090";
+    }
+    else {
+      spanelem.style.background = "#f26d66";
+    }
+    spanelem.style.position = "absolute";
+    spanelem.style.fontSize = "16px";
+    spanelem.style.color = "fff";
+    spanelem.style.fontWeight = "650";
+
+    return spanelem;
   }
 
   createLogo(url){
