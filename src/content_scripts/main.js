@@ -18,13 +18,13 @@ class SearchResultParser {
   parseFromDuckDuckGo(dom){
     var parsedResults = new Array();
     // var resultados = dom.getElementById("links").querySelectorAll("div:not(#organic-module):not(.result):not(.result--more)");
-    var ads = dom.querySelector("div.results--main").querySelectorAll(".result__title");
+    var divResults = dom.querySelector("div.results--main").querySelectorAll(".result__title");
 
-    for (var i = 0; i < ads.length; i++) {
+    for (var i = 0; i < divResults.length; i++) {
       parsedResults.push({
         "urlsrc": 'duckduckgo.com',
-        "urltarget": ads[i].querySelector(".result__a").href,
-        "text": ads[i].textContent,
+        "urltarget": divResults[i].querySelector(".result__a").href,
+        "text": divResults[i].textContent,
         "rank": parsedResults.length
       });
     }
@@ -106,21 +106,12 @@ class ContentPageManager{
     });
   }
 
-  updateDuckDuckGo(searchresults){
-
-  }
-
-  updateBing(searchresults){
-
-  }
-
-  updateGoogle(searchresults){
-    var divResults = document.getElementById("search").querySelectorAll("div.r");
+  updateContentOfDomain(args){
+    var divResults = this.getResultsFromCurrentDOM(args.host);
 
     var div = document.createElement("div");
 
-    var img = this.createLogo(searchresults[0].urlsrc);
-
+    var img = this.createLogo(args.searchresults[0].urlsrc);
 
     div.style.float = "left";
     div.style.width = "14%";
@@ -129,11 +120,11 @@ class ContentPageManager{
     for (var i = 0; i < divResults.length; i++) {
       var j = 0;
 
-      while ((j < searchresults.length) && (divResults[i].querySelector("a").href != searchresults[j].urltarget)) {
+      while ((j < args.searchresults.length) && (this.getHrefFromResult(divResults[i], args.host) != args.searchresults[j].urltarget)) {
         j++;
       }
 
-      if (j == searchresults.length){
+      if (j == args.searchresults.length){
         var span = this.createRank("X");
       }
       else {
@@ -142,12 +133,65 @@ class ContentPageManager{
 
       var newDiv = div.cloneNode(true);
       newDiv.appendChild(span);
-      divResults[i].appendChild(newDiv);
+      this.appendToResult(newDiv, divResults[i], args.host);
+      this.addBorderToResult(divResults[i], args.host);
 
+    }
+  }
+
+  appendToResult(newDiv, divresult, currentHostname){
+    if (currentHostname == "www.google.com") {
+      divresult.appendChild(newDiv);
+    }
+    if (currentHostname == "www.bing.com") {
+      divresult.appendChild(newDiv);
+    }
+    if (currentHostname == "duckduckgo.com") {
+      divresult.parentNode.appendChild(newDiv);
+    }
+  }
+
+  addBorderToResult(divresult, currentHostname){
+    if (currentHostname == "www.google.com"){
+      divresult.parentNode.style.border = "thin dotted red";
+      divresult.parentNode.style.padding = "10px"
+      divresult.parentNode.style.marginBottom = "20px";
+    }
+    if (currentHostname == "www.bing.com"){
+      divresult.style.border = "thin dotted red";
+      divresult.style.marginBottom = "20px";
+    }
+    if (currentHostname == "duckduckgo.com"){
+      divresult.parentNode.style.border = "thin dotted red";
+      divresult.parentNode.style.marginBottom = "20px";
     }
 
   }
 
+  getHrefFromResult(divresult, currentHostname){
+
+    if (currentHostname == "www.google.com"){
+      return divresult.querySelector("a").href;
+    }
+    if (currentHostname == "www.bing.com"){
+      return divresult.querySelector("a").href;
+    }
+    if (currentHostname == "duckduckgo.com"){
+      return divresult.querySelector(".result__a").href;
+    }
+  }
+
+  getResultsFromCurrentDOM(host){
+    if (host == "www.google.com"){
+        return document.getElementById("search").querySelectorAll("div.r");
+    }
+    if (host == "www.bing.com"){
+        return document.getElementById("b_results").querySelectorAll("li.b_ad, li.b_algo, li.b_ans.b_mop");
+    }
+    if (host == "duckduckgo.com"){
+        return document.querySelector("div.results--main").querySelectorAll(".result__title");
+    }
+  }
 
   createRank(textcontent){
     var spanelem = document.createElement("span");
@@ -175,37 +219,26 @@ class ContentPageManager{
   createLogo(url){
     var imgelem = document.createElement("img");
 
-    if (url == "duckduckgo.com"){
+    if (url == "duckduckgo.com") {
       imgelem.src = "chrome-extension://pegagencoflfghdhhihallhncmdojpgp/resources/duckduckgologo48.png";
     }
-    if (url == "www.bing.com"){
+    if (url == "www.bing.com") {
       imgelem.src = "chrome-extension://pegagencoflfghdhhihallhncmdojpgp/resources/binglogo48.png";
     }
-    //falta la de google
+    if (url == "www.google.com") {
+      imgelem.src = "chrome-extension://pegagencoflfghdhhihallhncmdojpgp/resources/googlelogo48.png";
+    }
+
     imgelem.title = "logo";
     imgelem.alt = "logo";
     imgelem.style.padding = "4px";
 
     return imgelem;
   }
-
-  updateContentOfDomain(args){
-    if (args.host == 'duckduckgo.com'){
-      this.updateDuckDuckGo(args.searchresults);
-    }
-
-    if (args.host == 'www.bing.com'){
-      this.updateBing(args.searchresults);
-    }
-
-    if (args.host == 'www.google.com'){
-      this.updateGoogle(args.searchresults);
-    }
-  }
 }
 
 var pageManager = new ContentPageManager();
-// alert(Date.now());
+
 chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
     if(pageManager[request.call]){
@@ -213,11 +246,3 @@ chrome.runtime.onMessage.addListener(
     }
   }
 );
-// window.addEventListener("load",
-//   function(request, sender, sendResponse){
-//     // alert(request.call);
-//     if(request.call == "extractSearchResults"){
-//       alert("llamando!");
-//       // pageManager.extractSearchResults();
-//     }
-// });
