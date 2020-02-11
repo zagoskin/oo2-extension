@@ -1,3 +1,12 @@
+class Result {
+  constructor(urlsrc,urltarget,text,rank){
+    this.urlsrc = urlsrc;
+    this.urltarget = urltarget;
+    this.text = text;
+    this.rank = rank;
+  }
+}
+
 class SearchResultParser {
   constructor(dom){
     var host = window.location.hostname;
@@ -21,12 +30,7 @@ class SearchResultParser {
     var divResults = dom.querySelector("div.results--main").querySelectorAll(".result__title");
 
     for (var i = 0; i < divResults.length; i++) {
-      parsedResults.push({
-        "urlsrc": 'duckduckgo.com',
-        "urltarget": divResults[i].querySelector(".result__a").href,
-        "text": divResults[i].textContent,
-        "rank": parsedResults.length
-      });
+      parsedResults.push(new Result('duckduckgo.com', divResults[i].querySelector(".result__a").href, divResults[i].textContent, parsedResults.length));
     }
 
     return parsedResults;
@@ -38,12 +42,7 @@ class SearchResultParser {
     var divResults = dom.getElementById("b_results").childNodes;
     for (var i = 0; i < divResults.length; i++) {
       if (divResults[i].className != "b_pag" && divResults[i].className != "b_ans"){
-        parsedResults.push({
-          "urlsrc": 'www.bing.com',
-          "urltarget": divResults[i].querySelector("a").href,
-          "text": divResults[i].querySelector("a").textContent,
-          "rank": parsedResults.length
-        });
+        parsedResults.push(new Result('www.bing.com', divResults[i].querySelector("a").href, divResults[i].querySelector("a").textContent, parsedResults.length));
       }
     }
 
@@ -55,12 +54,7 @@ class SearchResultParser {
 
     var divResults = dom.getElementById("search").querySelectorAll("div.r");
     for (var i = 0; i < divResults.length; i++) {
-      parsedResults.push({
-        "urlsrc": 'www.google.com',
-        "urltarget": divResults[i].querySelector("a").href,
-        "text": divResults[i].querySelector("a").querySelector("h3").textContent,
-        "rank": parsedResults.length
-      });
+      parsedResults.push(new Result('www.google.com', divResults[i].querySelector("a").href, divResults[i].querySelector("a").querySelector("h3").textContent, parsedResults.length));
     }
 
     return parsedResults;
