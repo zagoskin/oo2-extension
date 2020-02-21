@@ -17,14 +17,17 @@
         "run_at": "document_end",
 		    "js": [
           "node_modules/webextension-polyfill/dist/browser-polyfill.js",
-          "content_scripts/main.js"
+          "content_scripts/main.js",
+          "content_scripts/Result.js",
+          "content_scripts/SearchResultParser.js"
         ]
 	  }
   ],
   "background": {
     "scripts": [
       "node_modules/webextension-polyfill/dist/browser-polyfill.js",
-      "background_scripts/main.js"
+      "background_scripts/main.js",
+      "background_scripts/Searcher.js"
     ]
   },
   "browser_action": {
