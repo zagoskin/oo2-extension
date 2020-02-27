@@ -166,7 +166,13 @@ class ContentPageManager{
     return imgelem;
   }
 }
-
+function startExtension(){
+  setTimeout(function () {
+    chrome.runtime.sendMessage({
+                      "call": "startExtension",
+                    });
+  }, 2000);
+}
 var pageManager = new ContentPageManager();
 
 chrome.runtime.onMessage.addListener(
@@ -176,3 +182,5 @@ chrome.runtime.onMessage.addListener(
     }
   }
 );
+
+window.onload = startExtension();

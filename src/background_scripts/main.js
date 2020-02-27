@@ -2,6 +2,9 @@ class BackgroundExtension{
   // decirHola(){
   //   console.log("hola");
   // }
+  startExtension(){
+    this.getCurrentTab(this.extractSearchString);
+  }
   getCurrentTab(callback) {
     var theTab;
 		return chrome.tabs.query({active: true,	currentWindow: true}, function(tabs) {
@@ -63,10 +66,25 @@ class BackgroundExtension{
 var startBackground = function(config) {
 	var extension = new BackgroundExtension(config.apiUrl);
 
-	chrome.browserAction.onClicked.addListener(() => {
-	  extension.getCurrentTab(extension.extractSearchString);
-	});
-
+	// chrome.browserAction.onClicked.addListener(() => {
+	//   extension.getCurrentTab(extension.extractSearchString);
+	// });
+  chrome.declarativeContent.onPageChanged.removeRules(undefined, function() {
+      chrome.declarativeContent.onPageChanged.addRules([{
+        conditions: [
+          new chrome.declarativeContent.PageStateMatcher({
+            pageUrl: {urlContains: 'www.google.com/search?'},
+          }),
+          new chrome.declarativeContent.PageStateMatcher({
+            pageUrl: {urlContains: 'www.bing.com/search?'},
+          }),
+          new chrome.declarativeContent.PageStateMatcher({
+            pageUrl: {urlContains: 'duckduckgo.com/?q'},
+          })
+        ],
+        actions: [new chrome.declarativeContent.ShowPageAction()]
+      }]);
+    });
 	chrome.runtime.onMessage.addListener((request, sender) => {
 		console.log("[background-side] calling the message: " + request.call);
 		if(extension[request.call]){
