@@ -8,9 +8,16 @@
     "activeTab",
     "tabs",
     "declarativeContent",
-    "storage",
-    "<all_urls>"
+    "storage"
   ],
+  "page_action": {
+    "default_popup": "resources/popup.html",
+    "default_icon": {
+      "16": "resources/bubble16.png",
+      "32": "resources/bubble32.png",
+      "64": "resources/bubble64.png"
+    }
+  },
   "content_scripts": [
     {
 		    "matches": ["https://*.google.com/search*", "https://*.bing.com/search*", "https://duckduckgo.com/?q*"],
@@ -30,12 +37,7 @@
       "background_scripts/Searcher.js"
     ]
   },
-  "browser_action": {
-    "default_title": "Expand your search!",
-    "default_icon": {
-        "64": "resources/bubble64.png"
-    }
-  },
+
   "icons": {
       "16": "resources/bubble16.png",
       "32": "resources/bubble32.png",
