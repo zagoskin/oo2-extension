@@ -50,8 +50,6 @@ class ContentPageManager{
     div.style.width = "14%";
     div.appendChild(img);
 
-    console.log(this.extractDomain(this.getHrefFromResult(divResults[7], args.host)));
-    console.log(this.extractDomain(args.searchresults[7].urltarget));
     for (var i = 0; i < divResults.length; i++) {
       var j = 0;
       var go = true;

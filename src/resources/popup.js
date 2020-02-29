@@ -13,8 +13,7 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         lengths.push(listaresultados[i].length);
       }
       var maxlength = Math.max(...lengths);
-      console.log(maxlength);
-      console.log(listaresultados);
+    
       for (var i = 0; i < maxlength; i++){
         for (var j = 0; j < listaresultados.length; j++){
           if (i < listaresultados[j].length){

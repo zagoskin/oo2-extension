@@ -53,7 +53,7 @@ class BackgroundExtension{
     chrome.tabs.get(args.originaltabid, function(tab) {
       chrome.tabs.highlight({'tabs': tab.index}, function() {});
     });
-    console.log(args.searchresults);
+
     chrome.tabs.sendMessage(args.originaltabid, {
       call: "updateCurrentDOM",
       args: {
