@@ -50,11 +50,19 @@ class ContentPageManager{
     div.style.width = "14%";
     div.appendChild(img);
 
+    console.log(this.extractDomain(this.getHrefFromResult(divResults[7], args.host)));
+    console.log(this.extractDomain(args.searchresults[7].urltarget));
     for (var i = 0; i < divResults.length; i++) {
       var j = 0;
-
-      while ((j < args.searchresults.length) && ((this.getTextFromResult(divResults[i], args.host).substring(0,30)) != (args.searchresults[j].text.substring(0,30)))) {
-        j++;
+      var go = true;
+      while ((j < args.searchresults.length) && (go)) {
+        if ((this.extractDomain(this.getHrefFromResult(divResults[i], args.host))) == (this.extractDomain(args.searchresults[j].urltarget)) && ((this.getTextFromResult(divResults[i], args.host).substring(0,30)) == (args.searchresults[j].text.substring(0,30))))
+        {
+          go = false;
+        }
+        else {
+          j++;
+        }
       }
 
       if (j == args.searchresults.length){
@@ -70,6 +78,27 @@ class ContentPageManager{
       this.addBorderToResult(divResults[i], args.host);
 
     }
+  }
+
+  extractDomain(url) {
+    var domain;
+    //find & remove protocol (http, ftp, etc.) and get domain
+    if (url.indexOf("://") > -1) {
+      domain = url.split('/')[2];
+    }
+    else {
+      domain = url.split('/')[0];
+    }
+
+    //find & remove www
+    if (domain.indexOf("www.") > -1) {
+      domain = domain.split('www.')[1];
+    }
+
+    domain = domain.split(':')[0]; //find & remove port number
+    domain = domain.split('?')[0]; //find & remove url params
+
+    return domain;
   }
 
   appendToResult(newDiv, divresult, currentHostname){
