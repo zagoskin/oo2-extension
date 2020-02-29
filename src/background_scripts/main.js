@@ -102,6 +102,8 @@ function checkExpectedParameters(config){
     return (config.length == foundParams.length);
 }
 
+var numero = 5;
+
 chrome.storage.local.get("config", function(data) {
     if (!checkExpectedParameters(data.config)) {
         data.config = {

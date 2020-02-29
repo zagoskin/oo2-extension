@@ -4,6 +4,8 @@ class ContentPageManager{
   // }
   extractSearchString(args){
     var searchString = document.getElementsByName("q")[0].value;
+    var resultsparser = new SearchResultParser(document);
+    allresults.push(resultsparser.results);
 
     chrome.runtime.sendMessage({
       "call": "retrieveSearchResults",
@@ -29,6 +31,7 @@ class ContentPageManager{
 
   updateCurrentDOM(args){
     var host = window.location.hostname;
+    allresults.push(args.searchresults);
 
     this.updateContentOfDomain({
       "host": host,
@@ -171,14 +174,21 @@ function startExtension(){
     chrome.runtime.sendMessage({
                       "call": "startExtension",
                     });
-  }, 2000);
+  }, 3000);
 }
 var pageManager = new ContentPageManager();
-
+var allresults = new Array();
 chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
-    if(pageManager[request.call]){
-       pageManager[request.call](request.args);
+    if(request.call == "devolverNumero"){
+      sendResponse({
+        results: allresults
+      });
+    }
+    else {
+      if(pageManager[request.call]){
+         pageManager[request.call](request.args);
+      }
     }
   }
 );
