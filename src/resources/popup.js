@@ -12,22 +12,23 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
       for (var i = 0; i < listaresultados.length; i++) {
         lengths.push(listaresultados[i].length);
       }
-      var minlength = Math.min(...lengths);
-      console.log(minlength);
+      var maxlength = Math.max(...lengths);
+      console.log(maxlength);
       console.log(listaresultados);
-      for (var i = 0; i < minlength; i++){
+      for (var i = 0; i < maxlength; i++){
         for (var j = 0; j < listaresultados.length; j++){
-          var aelem = document.createElement("a");
+          if (i < listaresultados[j].length){
+            var aelem = document.createElement("a");
 
-          aelem.href = listaresultados[j][i].urltarget;
-          aelem.textContent = "Resultado "+(i+1)+" de "+listaresultados[j][i].urlsrc+" ("+aelem.hostname+")";
+            aelem.href = listaresultados[j][i].urltarget;
+            aelem.textContent = "Resultado "+(i+1)+" de "+listaresultados[j][i].urlsrc+" ("+aelem.hostname+")";
 
-          aelem.style.padding = "2px";
-          aelem.style.fontWeight = "550";
-          body.appendChild(aelem);
-          var salto = document.createElement("br");
-          body.appendChild(salto);
-
+            aelem.style.padding = "2px";
+            aelem.style.fontWeight = "550";
+            body.appendChild(aelem);
+            var salto = document.createElement("br");
+            body.appendChild(salto);
+          }
         }
       }
   });

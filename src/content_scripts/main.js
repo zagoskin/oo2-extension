@@ -53,7 +53,7 @@ class ContentPageManager{
     for (var i = 0; i < divResults.length; i++) {
       var j = 0;
 
-      while ((j < args.searchresults.length) && (this.getHrefFromResult(divResults[i], args.host) != args.searchresults[j].urltarget)) {
+      while ((j < args.searchresults.length) && ((this.getTextFromResult(divResults[i], args.host).substring(0,30)) != (args.searchresults[j].text.substring(0,30)))) {
         j++;
       }
 
@@ -102,7 +102,6 @@ class ContentPageManager{
   }
 
   getHrefFromResult(divresult, currentHostname){
-
     if (currentHostname == "www.google.com"){
       return divresult.querySelector("a").href;
     }
@@ -114,6 +113,17 @@ class ContentPageManager{
     }
   }
 
+  getTextFromResult(divresult, currentHostname){
+    if (currentHostname == "www.google.com"){
+      return divresult.querySelector("a").querySelector("h3").textContent;
+    }
+    if (currentHostname == "www.bing.com"){
+      return divresult.querySelector("a").textContent;
+    }
+    if (currentHostname == "duckduckgo.com"){
+      return divresult.textContent;
+    }
+  }
   getResultsFromCurrentDOM(host){
     if (host == "www.google.com"){
         return document.getElementById("search").querySelectorAll("div.r");
@@ -174,7 +184,7 @@ function startExtension(){
     chrome.runtime.sendMessage({
                       "call": "startExtension",
                     });
-  }, 3000);
+  }, 2000);
 }
 var pageManager = new ContentPageManager();
 var allresults = new Array();
