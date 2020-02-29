@@ -40,8 +40,10 @@ class ContentPageManager{
   }
 
   updateContentOfDomain(args){
-    var divResults = this.getResultsFromCurrentDOM(args.host);
+    var resultsparser = new SearchResultParser(document);
+    var currentresults = resultsparser.results;
 
+    var divResults = this.getResultsFromCurrentDOM(args.host);
     var div = document.createElement("div");
 
     var img = this.createLogo(args.searchresults[0].urlsrc);
@@ -50,11 +52,11 @@ class ContentPageManager{
     div.style.width = "14%";
     div.appendChild(img);
 
-    for (var i = 0; i < divResults.length; i++) {
+    for (var i = 0; i < currentresults.length; i++) {
       var j = 0;
       var go = true;
       while ((j < args.searchresults.length) && (go)) {
-        if ((this.extractDomain(this.getHrefFromResult(divResults[i], args.host))) == (this.extractDomain(args.searchresults[j].urltarget)) && ((this.getTextFromResult(divResults[i], args.host).substring(0,30)) == (args.searchresults[j].text.substring(0,30))))
+        if (currentresults[i].equals(args.searchresults[j]))
         {
           go = false;
         }
@@ -78,25 +80,16 @@ class ContentPageManager{
     }
   }
 
-  extractDomain(url) {
-    var domain;
-    //find & remove protocol (http, ftp, etc.) and get domain
-    if (url.indexOf("://") > -1) {
-      domain = url.split('/')[2];
+  getResultsFromCurrentDOM(host){
+    if (host == "www.google.com"){
+        return document.getElementById("search").querySelectorAll("div.r");
     }
-    else {
-      domain = url.split('/')[0];
+    if (host == "www.bing.com"){
+        return document.getElementById("b_results").querySelectorAll("li.b_ad, li.b_algo, li.b_ans.b_mop");
     }
-
-    //find & remove www
-    if (domain.indexOf("www.") > -1) {
-      domain = domain.split('www.')[1];
+    if (host == "duckduckgo.com"){
+        return document.querySelector("div.results--main").querySelectorAll(".result__title");
     }
-
-    domain = domain.split(':')[0]; //find & remove port number
-    domain = domain.split('?')[0]; //find & remove url params
-
-    return domain;
   }
 
   appendToResult(newDiv, divresult, currentHostname){
@@ -126,41 +119,6 @@ class ContentPageManager{
       divresult.parentNode.style.marginBottom = "20px";
     }
 
-  }
-
-  getHrefFromResult(divresult, currentHostname){
-    if (currentHostname == "www.google.com"){
-      return divresult.querySelector("a").href;
-    }
-    if (currentHostname == "www.bing.com"){
-      return divresult.querySelector("a").href;
-    }
-    if (currentHostname == "duckduckgo.com"){
-      return divresult.querySelector(".result__a").href;
-    }
-  }
-
-  getTextFromResult(divresult, currentHostname){
-    if (currentHostname == "www.google.com"){
-      return divresult.querySelector("a").querySelector("h3").textContent;
-    }
-    if (currentHostname == "www.bing.com"){
-      return divresult.querySelector("a").textContent;
-    }
-    if (currentHostname == "duckduckgo.com"){
-      return divresult.textContent;
-    }
-  }
-  getResultsFromCurrentDOM(host){
-    if (host == "www.google.com"){
-        return document.getElementById("search").querySelectorAll("div.r");
-    }
-    if (host == "www.bing.com"){
-        return document.getElementById("b_results").querySelectorAll("li.b_ad, li.b_algo, li.b_ans.b_mop");
-    }
-    if (host == "duckduckgo.com"){
-        return document.querySelector("div.results--main").querySelectorAll(".result__title");
-    }
   }
 
   createRank(textcontent){
