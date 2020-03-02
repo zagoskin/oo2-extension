@@ -37,6 +37,10 @@ class ContentPageManager{
       "host": host,
       "searchresults": args.searchresults
     });
+
+    chrome.runtime.sendMessage({
+      "call": "enableAugmentation"
+    });
   }
 
   updateContentOfDomain(args){
@@ -165,11 +169,11 @@ class ContentPageManager{
   }
 }
 function startExtension(){
-  setTimeout(function () {
-    chrome.runtime.sendMessage({
+  // setTimeout(function () {
+  chrome.runtime.sendMessage({
                       "call": "startExtension",
                     });
-  }, 2000);
+  // }, 2000);
 }
 var pageManager = new ContentPageManager();
 var allresults = new Array();
@@ -188,4 +192,9 @@ chrome.runtime.onMessage.addListener(
   }
 );
 
-window.onload = startExtension();
+
+window.onload = chrome.storage.local.get('expandSearch', function (items) {
+                  if(items.expandSearch){
+                    startExtension();
+                  }
+                });

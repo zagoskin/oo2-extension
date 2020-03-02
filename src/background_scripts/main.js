@@ -3,6 +3,7 @@ class BackgroundExtension{
   //   console.log("hola");
   // }
   startExtension(){
+    this.searchedCount = 0;
     this.getCurrentTab(this.extractSearchString);
   }
   getCurrentTab(callback) {
@@ -29,7 +30,9 @@ class BackgroundExtension{
     var searcher = new Searcher();
 
     var searchUrls = searcher.searchWithoutDomain(args.keywords, args.hostname);
-
+    chrome.storage.local.set({
+      expandSearch: false
+    });
     searchUrls.forEach(function(url){
       chrome.tabs.create({'url': url}, function(tab){
         chrome.tabs.onUpdated.addListener(function listener (tabId, info) {
@@ -61,9 +64,24 @@ class BackgroundExtension{
       }
     });
   }
+
+  enableAugmentation(){
+    if (this.searchedCount < 2){
+      this.searchedCount++;
+    }
+    if (this.searchedCount = 2){
+      this.searchedCount = 0;
+      chrome.storage.local.set({
+        expandSearch: true
+      });
+    }
+  }
 }
 
 var startBackground = function(config) {
+  chrome.storage.local.set({
+    expandSearch: true
+  });
 	var extension = new BackgroundExtension(config.apiUrl);
 
 	// chrome.browserAction.onClicked.addListener(() => {
