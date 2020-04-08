@@ -7,7 +7,7 @@ class ContentPageManager{
     var resultsparser = new SearchResultParser(document);
     allresults.push(resultsparser.results);
 
-    chrome.runtime.sendMessage({
+    browser.runtime.sendMessage({
       "call": "retrieveSearchResults",
       "args": {
         "keywords": searchString,
@@ -19,7 +19,7 @@ class ContentPageManager{
 
   extractSearchResults(args){
     var resultsparser = new SearchResultParser(document);
-    window.onload = chrome.runtime.sendMessage({
+    window.onload = browser.runtime.sendMessage({
                       "call": "sendResultsToMainContent",
                       "args": {
                         "searchresults": resultsparser.results,
@@ -148,13 +148,13 @@ class ContentPageManager{
     var imgelem = document.createElement("img");
 
     if (url == "duckduckgo.com") {
-      imgelem.src = "chrome-extension://pegagencoflfghdhhihallhncmdojpgp/resources/duckduckgologo48.png";
+      imgelem.src = browser.runtime.getURL("resources/duckduckgologo48.png");
     }
     if (url == "www.bing.com") {
-      imgelem.src = "chrome-extension://pegagencoflfghdhhihallhncmdojpgp/resources/binglogo48.png";
+      imgelem.src = browser.runtime.getURL("resources/binglogo48.png");
     }
     if (url == "www.google.com") {
-      imgelem.src = "chrome-extension://pegagencoflfghdhhihallhncmdojpgp/resources/googlelogo48.png";
+      imgelem.src = browser.runtime.getURL("resources/googlelogo48.png");
     }
 
     imgelem.title = "logo";
@@ -166,14 +166,14 @@ class ContentPageManager{
 }
 function startExtension(){
   // setTimeout(function () {
-  chrome.runtime.sendMessage({
+  browser.runtime.sendMessage({
                       "call": "startExtension",
                     });
   // }, 2000);
 }
 var pageManager = new ContentPageManager();
 var allresults = new Array();
-chrome.runtime.onMessage.addListener(
+browser.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
     if(request.call == "devolverNumero"){
       sendResponse({
@@ -189,7 +189,7 @@ chrome.runtime.onMessage.addListener(
 );
 
 
-window.onload = chrome.storage.local.get('expandSearch', function (items) {
+window.onload = browser.storage.local.get('expandSearch', function (items) {
                   if(items.expandSearch == 0){
                     startExtension();
                   }
