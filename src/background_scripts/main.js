@@ -3,7 +3,6 @@ class BackgroundExtension{
   //   console.log("hola");
   // }
   startExtension(){
-    this.searchedCount = 0;
     this.getCurrentTab(this.extractSearchString);
   }
   getCurrentTab(callback) {
@@ -31,7 +30,7 @@ class BackgroundExtension{
 
     var searchUrls = searcher.searchWithoutDomain(args.keywords, args.hostname);
     chrome.storage.local.set({
-      expandSearch: false
+      expandSearch: 2
     });
     searchUrls.forEach(function(url){
       chrome.tabs.create({'url': url}, function(tab){
@@ -53,6 +52,7 @@ class BackgroundExtension{
 
   sendResultsToMainContent(args){
     chrome.tabs.remove(args.newtabid);
+    this.enableAugmentation();
     chrome.tabs.get(args.originaltabid, function(tab) {
       chrome.tabs.highlight({'tabs': tab.index}, function() {});
     });
@@ -66,21 +66,25 @@ class BackgroundExtension{
   }
 
   enableAugmentation(){
-    if (this.searchedCount < 2){
-      this.searchedCount++;
-    }
-    if (this.searchedCount = 2){
-      this.searchedCount = 0;
-      chrome.storage.local.set({
-        expandSearch: true
-      });
-    }
+    chrome.storage.local.get('expandSearch', function (items) {
+                      if(items.expandSearch > 0){
+                        chrome.storage.local.set({
+                          expandSearch: items.expandSearch-1
+                        });
+                      }
+                    });
+    // if (searchedCount = 2){
+    //   searchedCount = 0;
+    //   chrome.storage.local.set({
+    //     expandSearch: true
+    //   });
+    // }
   }
 }
 
 var startBackground = function(config) {
   chrome.storage.local.set({
-    expandSearch: true
+    expandSearch: 0
   });
 	var extension = new BackgroundExtension(config.apiUrl);
 

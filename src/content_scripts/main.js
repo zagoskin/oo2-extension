@@ -37,10 +37,6 @@ class ContentPageManager{
       "host": host,
       "searchresults": args.searchresults
     });
-
-    chrome.runtime.sendMessage({
-      "call": "enableAugmentation"
-    });
   }
 
   updateContentOfDomain(args){
@@ -194,7 +190,7 @@ chrome.runtime.onMessage.addListener(
 
 
 window.onload = chrome.storage.local.get('expandSearch', function (items) {
-                  if(items.expandSearch){
+                  if(items.expandSearch == 0){
                     startExtension();
                   }
                 });
