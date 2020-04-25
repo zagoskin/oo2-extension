@@ -1,15 +1,37 @@
-class BackgroundExtension{
+class BackgroundExtension extends AbstractP2PExtensionBackground{
   // decirHola(){
   //   console.log("hola");
   // }
+  peers = [];
+
+  constructor(){
+		super();
+	}
+
   startExtension(){
     this.getCurrentTab(this.extractSearchString);
   }
+
+  getExtensionName(){
+		return "bubblePop";
+	}
+
+	getExtensionId(){
+		return "bubblePop@info";
+	}
+
   getCurrentTab(callback) {
     var theTab;
 		return browser.tabs.query({active: true,	currentWindow: true}, function(tabs) {
       callback(tabs[0])
     });
+	}
+
+  getCurrentTabFF(callback) {
+		return browser.tabs.query({
+			active: true,
+			currentWindow: true
+		});
 	}
 
   extractSearchString(tab){
@@ -32,6 +54,18 @@ class BackgroundExtension{
     browser.storage.local.set({
       expandSearch: 2
     });
+
+    try {
+			this.sendRequest({
+				'hostname': args.hostname,
+        'keywords': args.keywords,
+				automatic:true,
+				withoutcheck:true
+			  },"All");
+		}catch(error){
+			     console.log("Error al utilizar sendurl");
+	  }
+
     searchUrls.forEach(function(url){
       browser.tabs.create({'url': url}, function(tab){
         browser.tabs.onUpdated.addListener(function listener (tabId, info) {
@@ -73,37 +107,65 @@ class BackgroundExtension{
                         });
                       }
                     });
-    // if (searchedCount = 2){
-    //   searchedCount = 0;
-    //   chrome.storage.local.set({
-    //     expandSearch: true
-    //   });
-    // }
+  }
+
+  setPeers(event){
+		self = extension;
+		try {
+			let listaUsuarios = extension.getDataCallBack();
+			console.log('Usuarios peers');
+			console.log(listaUsuarios);
+			self.peers = [];
+			for (let i in listaUsuarios){
+				if (listaUsuarios.hasOwnProperty(i)){
+				  self.peers.push(listaUsuarios[i]);
+				}
+			};
+		} catch(e) {
+				console.log("Error al cargar lista de usuarios");
+				console.log(e);
+		}
+  }
+
+  async automaticProcessing(msg , peer){
+    //BUSCAR RESULTADOS DE SEARCH DEL DOMAIN QUE VIENE POR MENSAJE
+    var searcher = new Searcher();
+    var searchUrl = searcher.searchUrlForDomain(msg.keywords, msg.hostname);
+
+    browser.tabs.create({'url': searchUrl}, function(tab){
+      browser.tabs.onUpdated.addListener(function listener (tabId, info) {
+        if (info.status === 'complete' && tabId === tab.id) {
+          browser.tabs.onUpdated.removeListener(listener);
+          browser.tabs.sendMessage(tab.id, {
+            call: 'extractSearchResultsP2P'
+          }, function(response) {
+            this.sendResponse({
+              'searchresults': response.results,
+              automatic:true,
+              withoutcheck:true
+            },peer);
+
+            browser.tabs.remove(tab.id);
+            this.getCurrentTabFF().then((tabs) => {
+        			browser.tabs.highlight({'tabs': tabs[0].index}, function() {});
+        		});
+          });
+        }
+      });
+    });
   }
 }
+var extension;
 
-var startBackground = function(config) {
+var startBackground = async function(config) {
   browser.storage.local.set({
     expandSearch: 0
   });
-	var extension = new BackgroundExtension(config.apiUrl);
+	extension = new BackgroundExtension(config.apiUrl);
+  extension.connect();
 
-  // chrome.declarativeContent.onPageChanged.removeRules(undefined, function() {
-  //     chrome.declarativeContent.onPageChanged.addRules([{
-  //       conditions: [
-  //         new chrome.declarativeContent.PageStateMatcher({
-  //           pageUrl: {urlContains: 'www.google.com/search?'},
-  //         }),
-  //         new chrome.declarativeContent.PageStateMatcher({
-  //           pageUrl: {urlContains: 'www.bing.com/search?'},
-  //         }),
-  //         new chrome.declarativeContent.PageStateMatcher({
-  //           pageUrl: {urlContains: 'duckduckgo.com/?q'},
-  //         })
-  //       ],
-  //       actions: [new chrome.declarativeContent.ShowPageAction()]
-  //     }]);
-  //   });
+  await extension.getPeers(extension.setPeers);
+
 	browser.runtime.onMessage.addListener((request, sender) => {
 		console.log("[background-side] calling the message: " + request.call);
 		if(extension[request.call]){
