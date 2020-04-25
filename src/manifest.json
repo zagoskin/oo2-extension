@@ -10,6 +10,11 @@
     "storage",
     "<all_urls>"
   ],
+  "applications": {
+        "gecko": {
+          "id": "bubblePop@info"
+        }
+	},
   "page_action": {
     "browser_style": true,
     "show_matches": ["https://*.google.com/search*", "https://*.bing.com/search*", "https://duckduckgo.com/?q*"],
@@ -36,7 +41,8 @@
     "scripts": [
       "node_modules/webextension-polyfill/dist/browser-polyfill.js",
       "background_scripts/main.js",
-      "background_scripts/Searcher.js"
+      "background_scripts/Searcher.js",
+      "background_scripts/conector.js"
     ]
   },
   "web_accessible_resources": [
