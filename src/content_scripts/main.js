@@ -205,14 +205,22 @@ var pageManager = new ContentPageManager();
 var allresults = new Array();
 browser.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
-    if(request.call == "devolverNumero"){
+    if(request.call == "extractSearchResultsP2P"){
+      var searchResults =pageManager.extractSearchResultsForPeer();
       sendResponse({
-        results: allresults
+        results: searchResults
       });
     }
     else {
-      if(pageManager[request.call]){
-         pageManager[request.call](request.args);
+      if(request.call == "devolverNumero"){
+        sendResponse({
+          results: allresults
+        });
+      }
+      else {
+        if(pageManager[request.call]){
+           pageManager[request.call](request.args);
+        }
       }
     }
   }
