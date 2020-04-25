@@ -176,7 +176,7 @@ var startBackground = async function(config) {
   extension.connect();
 
   await extension.getPeers(extension.setPeers);
-
+  console.log('Hola! arrancando bg');
 	browser.runtime.onMessage.addListener((request, sender) => {
 		console.log("[background-side] calling the message: " + request.call);
 		if(extension[request.call]){

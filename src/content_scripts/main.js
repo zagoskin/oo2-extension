@@ -226,9 +226,10 @@ browser.runtime.onMessage.addListener(
   }
 );
 
-
 window.onload = browser.storage.local.get('expandSearch', function (items) {
+                  console.log('Preparado para llamar a bg');
                   if(items.expandSearch == 0){
+                    console.log('Llamando a bg');
                     startExtension();
                   }
                 });
