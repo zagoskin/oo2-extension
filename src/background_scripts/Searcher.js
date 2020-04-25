@@ -3,6 +3,18 @@ class Searcher {
     this.hostnames =  new Array("www.google.com", "www.bing.com", "duckduckgo.com");
   }
 
+  searchUrlForDomain(keyword, hostname){
+    var searchUrl;
+    if (hostname == "duckduckgo.com") {
+      searchUrl ='https://' + hostname + '/?q=' + keyword;
+
+    }
+    else {
+      searchUrl ='https://' + hostname + '/search?q=' + keyword;
+    }
+    return searchUrl;
+  }
+
   searchKeyword (keyword){
 
     var searchurls = new Array();
