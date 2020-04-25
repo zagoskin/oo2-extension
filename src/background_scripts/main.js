@@ -154,6 +154,17 @@ class BackgroundExtension extends AbstractP2PExtensionBackground{
       });
     });
   }
+
+  receiveResponse(msg, peer){
+    this.getCurrentTabFF().then((tabs) => {
+      browser.tabs.sendMessage(tabs[0].id, {
+        call: 'updateCurrentDOM',
+        args: {
+          "searchresults": msg.searchresults
+        }
+      });
+    });
+  }
 }
 var extension;
 
