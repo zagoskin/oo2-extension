@@ -7,10 +7,16 @@
   "permissions": [
     "activeTab",
     "tabs",
-    "declarativeContent",
     "storage"
   ],
+  "applications": {
+        "gecko": {
+          "id": "bubblePop@info"
+        }
+	},
   "page_action": {
+    "browser_style": true,
+    "show_matches": ["https://*.google.com/search*", "https://*.bing.com/search*", "https://duckduckgo.com/?q*"],
     "default_popup": "resources/popup.html",
     "default_icon": {
       "16": "resources/bubble16.png",
@@ -33,11 +39,16 @@
   "background": {
     "scripts": [
       "node_modules/webextension-polyfill/dist/browser-polyfill.js",
+      "background_scripts/conector.js",
       "background_scripts/main.js",
       "background_scripts/Searcher.js"
     ]
   },
-
+  "web_accessible_resources": [
+    "resources/duckduckgologo48.png",
+    "resources/binglogo48.png",
+    "resources/googlelogo48.png"
+  ],
   "icons": {
       "16": "resources/bubble16.png",
       "32": "resources/bubble32.png",

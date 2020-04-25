@@ -1,13 +1,14 @@
 class ContentPageManager{
-  // alertHola(){
-  //   console.log("hola!");
-  // }
+  constructor(){
+    this.peersCount = 0;
+    this.matchedResults = new Array(100).fill(0);
+  }
   extractSearchString(args){
     var searchString = document.getElementsByName("q")[0].value;
     var resultsparser = new SearchResultParser(document);
     allresults.push(resultsparser.results);
 
-    chrome.runtime.sendMessage({
+    browser.runtime.sendMessage({
       "call": "retrieveSearchResults",
       "args": {
         "keywords": searchString,
@@ -19,7 +20,7 @@ class ContentPageManager{
 
   extractSearchResults(args){
     var resultsparser = new SearchResultParser(document);
-    window.onload = chrome.runtime.sendMessage({
+    window.onload = browser.runtime.sendMessage({
                       "call": "sendResultsToMainContent",
                       "args": {
                         "searchresults": resultsparser.results,
@@ -27,6 +28,11 @@ class ContentPageManager{
                         "newtabid": args.newtabid
                       }
                     });
+  }
+
+  extractSearchResultsForPeer(){
+    var resultsparser = new SearchResultParser(document);
+    return resultsparser.results;
   }
 
   updateCurrentDOM(args){
@@ -43,14 +49,21 @@ class ContentPageManager{
     var resultsparser = new SearchResultParser(document);
     var currentresults = resultsparser.results;
 
+    var parsingFromPeer = (args.host == args.searchresults[0].urlsrc);
+
     var divResults = this.getResultsFromCurrentDOM(args.host);
     var div = document.createElement("div");
 
-    var img = this.createLogo(args.searchresults[0].urlsrc);
+    if (!parsingFromPeer){
+      var img = this.createLogo(args.searchresults[0].urlsrc);
+      div.appendChild(img);
+    } else {
+      this.peersCount++;
+    }
 
     div.style.float = "left";
     div.style.width = "14%";
-    div.appendChild(img);
+
 
     for (var i = 0; i < currentresults.length; i++) {
       var j = 0;
@@ -64,19 +77,36 @@ class ContentPageManager{
           j++;
         }
       }
-
-      if (j == args.searchresults.length){
-        var span = this.createRank("X");
+      if (parsingFromPeer){
+        if (divResults[i].querySelector("#p2pComparisson") == null){
+          if (j != args.searchresults.length){
+            this.matchedResults[i]++;
+          }
+          var span = this.createRank(this.matchedResults[i] + " of " + this.peersCount);
+          span.style.float = "left";
+          //width?
+          span.id = "p2pComparisson";
+          this.appendToResult(span, divResults[i], args.host);
+        }
+        else {
+          if (j != args.searchresults.length){
+            this.matchedResults[i]++;
+          }
+          divResults[i].querySelector("#p2pComparisson").textContent = this.matchedResults[i] + " of " + this.peersCount;
+        }
       }
       else {
-        var span = this.createRank(j+1);
+        if (j == args.searchresults.length){
+          var span = this.createRank("X");
+        }
+        else {
+          var span = this.createRank(j+1);
+        }
+        var newDiv = div.cloneNode(true);
+        newDiv.appendChild(span);
+        this.appendToResult(newDiv, divResults[i], args.host);
+        this.addBorderToResult(divResults[i], args.host);
       }
-
-      var newDiv = div.cloneNode(true);
-      newDiv.appendChild(span);
-      this.appendToResult(newDiv, divResults[i], args.host);
-      this.addBorderToResult(divResults[i], args.host);
-
     }
   }
 
@@ -148,13 +178,13 @@ class ContentPageManager{
     var imgelem = document.createElement("img");
 
     if (url == "duckduckgo.com") {
-      imgelem.src = "chrome-extension://pegagencoflfghdhhihallhncmdojpgp/resources/duckduckgologo48.png";
+      imgelem.src = browser.runtime.getURL("resources/duckduckgologo48.png");
     }
     if (url == "www.bing.com") {
-      imgelem.src = "chrome-extension://pegagencoflfghdhhihallhncmdojpgp/resources/binglogo48.png";
+      imgelem.src = browser.runtime.getURL("resources/binglogo48.png");
     }
     if (url == "www.google.com") {
-      imgelem.src = "chrome-extension://pegagencoflfghdhhihallhncmdojpgp/resources/googlelogo48.png";
+      imgelem.src = browser.runtime.getURL("resources/googlelogo48.png");
     }
 
     imgelem.title = "logo";
@@ -166,14 +196,14 @@ class ContentPageManager{
 }
 function startExtension(){
   // setTimeout(function () {
-  chrome.runtime.sendMessage({
+  browser.runtime.sendMessage({
                       "call": "startExtension",
                     });
   // }, 2000);
 }
 var pageManager = new ContentPageManager();
 var allresults = new Array();
-chrome.runtime.onMessage.addListener(
+browser.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
     if(request.call == "devolverNumero"){
       sendResponse({
@@ -189,7 +219,7 @@ chrome.runtime.onMessage.addListener(
 );
 
 
-window.onload = chrome.storage.local.get('expandSearch', function (items) {
+window.onload = browser.storage.local.get('expandSearch', function (items) {
                   if(items.expandSearch == 0){
                     startExtension();
                   }
