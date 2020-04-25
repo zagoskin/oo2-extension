@@ -100,7 +100,7 @@ class BackgroundExtension extends AbstractP2PExtensionBackground{
   }
 
   enableAugmentation(){
-    browser.storage.local.get('expandSearch').then(items => {
+    browser.storage.local.get('expandSearch', function(items) {
                       if(items.expandSearch > 0){
                         browser.storage.local.set({
                           expandSearch: items.expandSearch-1
@@ -166,13 +166,12 @@ class BackgroundExtension extends AbstractP2PExtensionBackground{
     });
   }
 }
-var extension;
 
 var startBackground = async function(config) {
   browser.storage.local.set({
     expandSearch: 0
   });
-	extension = new BackgroundExtension(config.apiUrl);
+	var extension = new BackgroundExtension(config.apiUrl);
   extension.connect();
 
   await extension.getPeers(extension.setPeers);
@@ -196,12 +195,14 @@ function checkExpectedParameters(config){
 
 var numero = 5;
 
-browser.storage.local.get("config").then(data => {
+browser.storage.local.get("config", function(data) {
     if (!checkExpectedParameters(data.config)) {
         data.config = {
         	"apiUrl": ""
         };
-        browser.storage.local.set({"config": data.config }).then(() => startBackground(data.config));
+        browser.storage.local.set({"config": data.config }, function(){
+          startBackground(data.config)
+        });
     }
     else startBackground(data.config);
 
