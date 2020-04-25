@@ -29,6 +29,11 @@ class ContentPageManager{
                     });
   }
 
+  extractSearchResultsForPeer(){
+    var resultsparser = new SearchResultParser(document);
+    return resultsparser.results;
+  }
+
   updateCurrentDOM(args){
     var host = window.location.hostname;
     allresults.push(args.searchresults);
@@ -175,9 +180,10 @@ var pageManager = new ContentPageManager();
 var allresults = new Array();
 browser.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
-    if(request.call == "devolverNumero"){
+    if(request.call == "extractSearchResultsP2P"){
+      var searchResults =pageManager.extractSearchResultsForPeer();
       sendResponse({
-        results: allresults
+        results: searchResults
       });
     }
     else {
