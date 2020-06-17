@@ -135,7 +135,9 @@ class BackgroundExtension extends AbstractP2PExtensionBackground{
     //BUSCAR RESULTADOS DE SEARCH DEL DOMAIN QUE VIENE POR MENSAJE
     var searcher = new Searcher();
     var searchUrl = searcher.searchUrlForDomain(msg.keywords, msg.hostname);
-
+    browser.storage.local.set({
+      expandSearch: 2
+    });
     browser.tabs.create({'url': searchUrl}, function(tab){
       browser.tabs.onUpdated.addListener(function listener (tabId, info) {
         if (info.status === 'complete' && tabId === tab.id) {
@@ -143,14 +145,17 @@ class BackgroundExtension extends AbstractP2PExtensionBackground{
           browser.tabs.sendMessage(tab.id, {
             call: 'extractSearchResultsP2P'
           }, function(response) {
-            this.sendResponse({
+            browser.storage.local.set({
+              expandSearch: 0
+            });
+            extension.sendResponse({
               'searchresults': response.results,
               automatic:true,
               withoutcheck:true
             },peer);
 
             browser.tabs.remove(tab.id);
-            this.getCurrentTabFF().then((tabs) => {
+            extension.getCurrentTabFF().then((tabs) => {
         			browser.tabs.highlight({'tabs': tabs[0].index}, function() {});
         		});
           });
@@ -160,6 +165,7 @@ class BackgroundExtension extends AbstractP2PExtensionBackground{
   }
 
   receiveResponse(msg, peer){
+    console.log(msg.searchresults);
     this.getCurrentTabFF().then((tabs) => {
       browser.tabs.sendMessage(tabs[0].id, {
         call: 'updateCurrentDOM',
@@ -171,11 +177,13 @@ class BackgroundExtension extends AbstractP2PExtensionBackground{
   }
 }
 
+var extension;
+
 var startBackground = async function(config) {
   browser.storage.local.set({
     expandSearch: 0
   });
-	var extension = new BackgroundExtension(config.apiUrl);
+	extension = new BackgroundExtension(config.apiUrl);
   extension.connect();
 
   await extension.getPeers(extension.setPeers);
