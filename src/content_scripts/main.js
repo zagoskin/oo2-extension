@@ -82,11 +82,29 @@ class ContentPageManager{
           if (j != args.searchresults.length){
             this.matchedResults[i]++;
           }
-          var span = this.createRank(this.matchedResults[i] + " of " + this.peersCount);
-          span.style.float = "left";
+          //var span = this.createRank(this.matchedResults[i] + " of " + this.peersCount);
+          var newDiv = div.cloneNode(true);
+
           //width?
-          span.id = "p2pComparisson";
-          this.appendToResult(span, divResults[i], args.host);
+          newDiv.id = "p2pComparisson";
+          newDiv.style.width = "48px";
+          newDiv.style.height = "48px";
+          newDiv.style.border = "3px solid #000";
+          newDiv.style.background = "#ccc";
+          newDiv.style.borderRadius = "50%";
+          newDiv.textContent = this.matchedResults[i] + " of " + this.peersCount;
+          newDiv.style.fontSize = "14px";
+          newDiv.style.color = "fff";
+          newDiv.style.fontWeight = "650";
+          newDiv.style.display = "flex";
+          newDiv.style.justifyContent = "center";
+          newDiv.style.alignItems = "center";
+          newDiv.style.marginRight = "15px";
+          //newDiv.style.textAlign = "center";
+          //newDiv.style.verticalAlign = "center";
+          //newDiv.style.lineHeight = "48px";
+          //newDiv.appendChild(span);
+          this.appendToResult(newDiv, divResults[i], args.host);
         }
         else {
           if (j != args.searchresults.length){
