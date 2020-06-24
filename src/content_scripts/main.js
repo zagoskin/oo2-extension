@@ -1,12 +1,19 @@
 class ContentPageManager{
   constructor(){
     this.peersCount = 0;
-    this.matchedResults = new Array(100).fill(0);
+    this.matchedResultsForResult = new Array(20).fill(0);
   }
   extractSearchString(args){
     var searchString = document.getElementsByName("q")[0].value;
     var resultsparser = new SearchResultParser(document);
     allresults.push(resultsparser.results);
+
+    this.peersCount = args.peersCount;
+    for (var i = 0; i < ranksForResult.length; i++){
+        ranksForResult[i] = new Array();
+    }
+
+    console.log('La cantidad de peers es: '+this.peersCount);
 
     browser.runtime.sendMessage({
       "call": "retrieveSearchResults",
@@ -37,7 +44,9 @@ class ContentPageManager{
 
   updateCurrentDOM(args){
     var host = window.location.hostname;
-    allresults.push(args.searchresults);
+    if (args.pushToResults){
+      allresults.push(args.searchresults);
+    }
 
     this.updateContentOfDomain({
       "host": host,
@@ -57,10 +66,7 @@ class ContentPageManager{
     if (!parsingFromPeer){
       var img = this.createLogo(args.searchresults[0].urlsrc);
       div.appendChild(img);
-    } else {
-      this.peersCount++;
     }
-
     div.style.float = "left";
     div.style.width = "14%";
 
@@ -80,7 +86,10 @@ class ContentPageManager{
       if (parsingFromPeer){
         if (divResults[i].querySelector("#p2pComparisson") == null){
           if (j != args.searchresults.length){
-            this.matchedResults[i]++;
+            this.matchedResultsForResult[i]++;
+            ranksForResult[i].push(args.searchresults[j].rank);
+          } else {
+            ranksForResult[i].push(0);
           }
           //var span = this.createRank(this.matchedResults[i] + " of " + this.peersCount);
           var newDiv = div.cloneNode(true);
@@ -92,7 +101,8 @@ class ContentPageManager{
           newDiv.style.border = "3px solid #000";
           newDiv.style.background = "#ccc";
           newDiv.style.borderRadius = "50%";
-          newDiv.textContent = this.matchedResults[i] + " of " + this.peersCount;
+          newDiv.textContent = this.matchedResultsForResult[i] + " of " + this.peersCount;
+          textForResult[i] = this.matchedResultsForResult[i] + " of " + this.peersCount;
           newDiv.style.fontSize = "14px";
           newDiv.style.color = "fff";
           newDiv.style.fontWeight = "650";
@@ -108,9 +118,10 @@ class ContentPageManager{
         }
         else {
           if (j != args.searchresults.length){
-            this.matchedResults[i]++;
+            this.matchedResultsForResult[i]++;
           }
-          divResults[i].querySelector("#p2pComparisson").textContent = this.matchedResults[i] + " of " + this.peersCount;
+          divResults[i].querySelector("#p2pComparisson").textContent = this.matchedResultsForResult[i] + " of " + this.peersCount;
+          textForResult[i] = this.matchedResultsForResult[i] + " of " + this.peersCount;
         }
       }
       else {
@@ -221,8 +232,12 @@ function startExtension(){
 }
 var pageManager = new ContentPageManager();
 var allresults = new Array();
+var textForResult = new Array(20);
+var ranksForResult = new Array(20);
+
 browser.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
+    console.log("[content-side] calling the message: " + request.call);
     if(request.call == "extractSearchResultsP2P"){
       var searchResults =pageManager.extractSearchResultsForPeer();
       sendResponse({
@@ -231,8 +246,14 @@ browser.runtime.onMessage.addListener(
     }
     else {
       if(request.call == "devolverNumero"){
+        console.log(allresults);
+        console.log(textForResult);
+        console.log(ranksForResult);
         sendResponse({
-          results: allresults
+          results: allresults,
+          host: window.location.hostname,
+          textForResult: textForResult,
+          ranksForResult: ranksForResult
         });
       }
       else {
@@ -246,6 +267,7 @@ browser.runtime.onMessage.addListener(
 
 
 window.onload = browser.storage.local.get('expandSearch', function (items) {
+                  console.log("A punto de llamar start extension");
                   if(items.expandSearch == 0){
                     startExtension();
                   }

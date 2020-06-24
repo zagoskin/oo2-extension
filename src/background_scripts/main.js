@@ -9,7 +9,12 @@ class BackgroundExtension extends AbstractP2PExtensionBackground{
 	}
 
   startExtension(){
-    this.getCurrentTab(this.extractSearchString);
+    this.getCurrentTabFF().then((tabs) => {
+      browser.storage.local.set({
+        workingTab: tabs[0].id
+      });
+      this.getCurrentTab(this.extractSearchString);
+    });
   }
 
   getExtensionName(){
@@ -42,7 +47,8 @@ class BackgroundExtension extends AbstractP2PExtensionBackground{
       call: "extractSearchString",
       args: {
         "originaltabid": tab.id,
-        "hostname": url.hostname
+        "hostname": url.hostname,
+        "peersCount": extension.peers.length
       }
     });
 	}
@@ -92,7 +98,8 @@ class BackgroundExtension extends AbstractP2PExtensionBackground{
     browser.tabs.sendMessage(args.originaltabid, {
       call: "updateCurrentDOM",
       args: {
-        "searchresults": args.searchresults
+        "searchresults": args.searchresults,
+        "pushToResults": true
       }
     });
   }
@@ -165,15 +172,28 @@ class BackgroundExtension extends AbstractP2PExtensionBackground{
   }
 
   receiveResponse(msg, peer){
+    console.log("mostando resultados del peer");
     console.log(msg.searchresults);
-    this.getCurrentTabFF().then((tabs) => {
-      browser.tabs.sendMessage(tabs[0].id, {
+    browser.storage.local.get('workingTab', function (items) {
+      browser.tabs.sendMessage(items.workingTab, {
         call: 'updateCurrentDOM',
         args: {
-          "searchresults": msg.searchresults
+          "searchresults": msg.searchresults,
+          "pushToResults": false,
         }
       });
     });
+    // this.getCurrentTabFF().then((tabs) => {
+    //   console.log("Preparando para hacer update del DOM con datos del pier");
+    //   browser.tabs.sendMessage(tabs[0].id, {
+    //     call: 'updateCurrentDOM',
+    //     args: {
+    //       "searchresults": msg.searchresults,
+    //       "pushToResults": false,
+    //       "vengoDelP2P": true
+    //     }
+    //   });
+    // });
   }
 }
 
@@ -209,9 +229,9 @@ var startBackground = async function(config) {
   //   });
 	browser.runtime.onMessage.addListener((request, sender) => {
 		console.log("[background-side] calling the message: " + request.call);
-		if(extension[request.call]){
-			extension[request.call](request.args);
-		}
+    if(extension[request.call]){
+      extension[request.call](request.args);
+    }
 	});
 }
 

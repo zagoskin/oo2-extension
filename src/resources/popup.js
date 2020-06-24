@@ -7,21 +7,33 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
       // spanelem.textContent = response.results;
       //
       // body.appendChild(spanelem);
+      var promedios = new Array(20);
+      for (var i = 0; i < promedios.length; i++){
+        var suma = 0;
+        for (var j = 0; j < response.ranksForResult[i].length; j++){
+          suma += response.ranksForResult[i][j];
+        }
+        promedios[i] = suma/response.ranksForResult[i].length;
+      }
       var listaresultados = response.results;
       var lengths = new Array();
       for (var i = 0; i < listaresultados.length; i++) {
         lengths.push(listaresultados[i].length);
       }
       var maxlength = Math.max(...lengths);
-    
+
       for (var i = 0; i < maxlength; i++){
         for (var j = 0; j < listaresultados.length; j++){
           if (i < listaresultados[j].length){
             var aelem = document.createElement("a");
 
             aelem.href = listaresultados[j][i].urltarget;
-            aelem.textContent = "Resultado "+(i+1)+" de "+listaresultados[j][i].urlsrc+" ("+aelem.hostname+")";
+            if (j == 0){
+              aelem.textContent = "Resultado "+(i+1)+" de "+listaresultados[j][i].urlsrc+" ("+aelem.hostname+") | Posicion promedio "+promedios[i]+" ("+response.textForResult[i]+")" ;
+            }else {
+              aelem.textContent = "Resultado "+(i+1)+" de "+listaresultados[j][i].urlsrc+" ("+aelem.hostname+")";
 
+            }
             aelem.style.padding = "2px";
             aelem.style.fontWeight = "550";
             body.appendChild(aelem);
