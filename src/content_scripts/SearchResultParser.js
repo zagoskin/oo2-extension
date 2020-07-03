@@ -21,9 +21,8 @@ class SearchResultParser {
     var divResults = dom.querySelector("div.results--main").querySelectorAll(".result__title");
 
     for (var i = 0; i < divResults.length; i++) {
-      parsedResults.push(new Result('duckduckgo.com', divResults[i].querySelector(".result__a").href, divResults[i].textContent, parsedResults.length));
+      parsedResults.push(new Result('duckduckgo.com', divResults[i].querySelector(".result__a").href, divResults[i].querySelector(".result__a").textContent, parsedResults.length));
     }
-
     return parsedResults;
   }
 
