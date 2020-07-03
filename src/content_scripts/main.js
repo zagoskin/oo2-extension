@@ -47,7 +47,7 @@ class ContentPageManager{
     if (args.pushToResults){
       allresults.push(args.searchresults);
     }
-
+    
     this.updateContentOfDomain({
       "host": host,
       "searchresults": args.searchresults
