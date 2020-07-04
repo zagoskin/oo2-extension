@@ -28,8 +28,8 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
             var aelem = document.createElement("a");
 
             aelem.href = listaresultados[j][i].urltarget;
-            if (j == 0){
-              aelem.textContent = "Resultado "+(i+1)+" de "+listaresultados[j][i].urlsrc+" ("+aelem.hostname+") | Posicion promedio "+promedios[i]+" ("+response.textForResult[i]+")" ;
+            if ((j == 0) && (typeof response.textForResult[i] !== 'undefined')){
+              aelem.textContent = "Resultado "+(i+1)+" de "+listaresultados[j][i].urlsrc+" ("+aelem.hostname+") | Posicion promedio "+(promedios[i] + 1)+" ("+response.textForResult[i]+")" ;
             }else {
               aelem.textContent = "Resultado "+(i+1)+" de "+listaresultados[j][i].urlsrc+" ("+aelem.hostname+")";
 
