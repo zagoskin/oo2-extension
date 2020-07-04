@@ -18,11 +18,12 @@ class SearchResultParser {
   parseFromDuckDuckGo(dom){
     var parsedResults = new Array();
     // var resultados = dom.getElementById("links").querySelectorAll("div:not(#organic-module):not(.result):not(.result--more)");
-    var divResults = dom.querySelector("div.results--main").querySelectorAll(".result__title");
+    var divResults = dom.getElementById("links").querySelectorAll(".result__title");
 
     for (var i = 0; i < divResults.length; i++) {
       parsedResults.push(new Result('duckduckgo.com', divResults[i].querySelector(".result__a").href, divResults[i].querySelector(".result__a").textContent, parsedResults.length));
     }
+    
     return parsedResults;
   }
 
