@@ -99,7 +99,8 @@ class BackgroundExtension extends AbstractP2PExtensionBackground{
       call: "updateCurrentDOM",
       args: {
         "searchresults": args.searchresults,
-        "pushToResults": true
+        "pushToResults": true,
+        "peersCount": extension.peers.length
       }
     });
   }
@@ -180,6 +181,7 @@ class BackgroundExtension extends AbstractP2PExtensionBackground{
         args: {
           "searchresults": msg.searchresults,
           "pushToResults": false,
+          "peersCount": extension.peers.length
         }
       });
     });
