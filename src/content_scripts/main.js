@@ -47,7 +47,9 @@ class ContentPageManager{
     if (args.pushToResults){
       allresults.push(args.searchresults);
     }
-    
+
+    this.peersCount = args.peersCount;
+
     this.updateContentOfDomain({
       "host": host,
       "searchresults": args.searchresults
@@ -57,7 +59,7 @@ class ContentPageManager{
   updateContentOfDomain(args){
     var resultsparser = new SearchResultParser(document);
     var currentresults = resultsparser.results;
-
+    allresults[0] = currentresults;
     var parsingFromPeer = (args.host == args.searchresults[0].urlsrc);
 
     var divResults = this.getResultsFromCurrentDOM(args.host);
@@ -84,7 +86,7 @@ class ContentPageManager{
         }
       }
       if (parsingFromPeer){
-        if (divResults[i].querySelector("#p2pComparisson") == null){
+        if (document.getElementById("p2pComparisson"+i) == null){
           if (j != args.searchresults.length){
             this.matchedResultsForResult[i]++;
             ranksForResult[i].push(args.searchresults[j].rank);
@@ -95,7 +97,7 @@ class ContentPageManager{
           var newDiv = div.cloneNode(true);
 
           //width?
-          newDiv.id = "p2pComparisson";
+          newDiv.id = "p2pComparisson"+i;
           newDiv.style.width = "48px";
           newDiv.style.height = "48px";
           newDiv.style.border = "3px solid #000";
@@ -120,7 +122,7 @@ class ContentPageManager{
           if (j != args.searchresults.length){
             this.matchedResultsForResult[i]++;
           }
-          divResults[i].querySelector("#p2pComparisson").textContent = this.matchedResultsForResult[i] + " of " + this.peersCount;
+          document.getElementById("p2pComparisson"+i).textContent = this.matchedResultsForResult[i] + " of " + this.peersCount;
           textForResult[i] = this.matchedResultsForResult[i] + " of " + this.peersCount;
         }
       }
